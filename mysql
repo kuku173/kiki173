@@ -1,0 +1,128 @@
+mysql的第一部分为终端操作数据库
+一.基础语法
+1.如何查看有什么数据库?    
+show databases;
+2.如何选择数据库?   
+use databasesName;
+3.如何查看该数据库中有哪些表?   
+show tables;
+4.如何查询表中的数据?   
+select * from tableName;
+5.如何退出数据库服务器?
+exit;
+6.如何在数据库服务器中创建自己的数据库?   
+create database databaseName;
+7.如何创建一个数据表? 创建一个pet表
+create TABLE pet(
+                   name VARCHAR(20),
+                   owner VARCHAR(20),
+                   specise VARCHAR(20),
+                   sex CHAR(1),
+                   brith DATAE,
+                   death DATE );
+注意事项：①mysql对大小写并不敏感，但关键字大写是一种规范，建议遵从。
+                  ②var（）没达到括号中的长度会自动用空格补充，而varchar不会
+8.如何查看数据表的架构?   
+describe tableName;/desc tableName；
+9.如何插入数据?
+ INSERT INTO pet VALUES('kk','cc','dog','1','1998-8-2',null);
+或者是 
+INSERT INTO pet(name,owner) VALUES ('xx','cc');
+代表我只在name和owner字段上面插入的一条,其他皆为NULL/默认值的数据
+10.如何删除数据
+       先插入数据:
+       INSERT INTO pet VALUES('kk1','cc1','dog1','1','1998-1-2',null);
+       INSERT INTO pet VALUES('kk2','cc2','dog2','2','1998-2-2',null);
+       INSERT INTO pet VALUES('kk3','cc3','dog3','1','1998-3-2','1998-12-2');
+       INSERT INTO pet VALUES('kk4','cc4','dog4','2','1998-4-2',null);
+       删除语句:
+DELETE FROM tablesName WHRER 条件;
+例如：DELETE FROM pet WHRER name='kk1';（是删除这一整条数据）
+        修改数据:
+UPDATE tableName SET 字段1=值1,字段2=值2 ... WHERE 条件;
+例如：CC1的宠物才叫kk2
+UPDATE pet SET name=‘kk2’ where owner=‘cc1’；
+二.条件约束
+1.主键约束
+它能够唯一确定一张表中的一条记录,增加主键约束之后,就可以使得字段不重复而且不为空   
+例如：
+    create table user(
+    id int PRIMARY KEY,
+    name VARCHAR(20)
+);
+其中id字段的值不可为空也不可重复
+ 2.复合主键:
+CREATE TABLE user2(
+    id INT,
+    name VARCHAR(20),
+    password VARCHAR(20),
+    PRIMARY key(id,name)
+);
+ 2.复合主键:
+![AG]BGDO3~T7~({BHC9A(Y%B.png](https://upload-images.jianshu.io/upload_images/22756325-c725526faa122057.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+说明了复合主键只要所有的字段都不是相同的情况下可以允许其中的字段重复
+3.自增约束
+![2TQ}[F)6H7)0JWZG5K7G}]6.png](https://upload-images.jianshu.io/upload_images/22756325-cb3f5e6ecb5db9da.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+4.唯一约束
+![E7U}$SX)C7J5@AM{PEPIE9P.png](https://upload-images.jianshu.io/upload_images/22756325-d78466cef6882faf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 总结一下:
+    主键约束(primary key)中包含了唯一约束
+设计一张用户注册表,用户姓名必须要用手机号来注册,而且手机号和用户名称都不能为空,那么:
+CREATE TABLE user_test(
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT'主键id',
+    name VARCHAR(20) NOT NULL COMMENT'用户姓名,不能为空',
+    phone_number VARCHAR(20) UNIQUE NOT NULL COMMENT'用户手机,不能重复且不能为空'
+ 这样的话就达到了每一个手机号都只能出现一次,达到了每个手机号只能被注册一次.
+用户姓名可以重复,但是手机号码却不能重复,复合正常的逻辑需求
+5.非空约束:
+字面意思，直接加载字段长度后
+6.默认约束
+ CREATE TABLE user6(
+   id int PRIMARY KEY AUTO_INCREMENT COMMENT'主键id',
+   name VARCHAR(20) NOT NULL COMMENT'用户姓名不能为空',
+   phone_number VARCHAR(20) NOT NULL COMMENT'用户手机号,不能为空',
+   status INT DEFAULT 0 COMMENT'用户状态0:启用 1:禁封 默认:0'
+);
+ 插入数据:
+INSERT INTO user6(name,phone_number) VALUES ('aa','123');
+INSERT INTO user6(name,phone_number) VALUES('bb','1234');
+INSERT INTO user6(name,phone_number) VALUES('cc','1263456');![9BXT{[`K2F)EFNLW{HXT{T7.png](https://upload-images.jianshu.io/upload_images/22756325-6d54a9eb3b7349e7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 应用场景:
+业务需求:找正常的用户,对这些正常用户进行发放优惠卷或者积分之类的东西,而被禁封的用户我们不让其参加多动.
+我们想要封用户只要将status的值从0改为1就行了,当然我们取用户的时候必须要先判断status是否是0.若是1.说明该用户已经被禁封.
+先封手机号为'1234'的用户:
+UPDATE user6 SET status = 1 WHERE phone_number= '1234';
+SELECT * FROM user6;
+![U`CNJ$RO]YU0L%6GLF3)O36.png](https://upload-images.jianshu.io/upload_images/22756325-1bb3e1b27167c7a8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 我们取用户的时候加上status的判断,如:
+SELECT * FROM user6 WHERE status = 0;
+就可以选取正常的用户了
+7.外键约束
+ CREATE TABLE classes(
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT'班级表id',
+    name VARCHAR(20) COMMENT'班级名称'
+);
+运行一下
+![MK%8J_X$%DVH}DZ$N%M){LT.png](https://upload-images.jianshu.io/upload_images/22756325-5b1da9d1f65b4992.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ CREATE TABLE student(
+   id INT PRIMARY KEY AUTO_INCREMENT COMMENT'学生表id',
+   name VARCHAR(20) COMMENT'学生姓名',
+    class_id int COMMENT'教室id,这张表中的class_id是classes表中id的值',
+    FOREIGN KEY (class_id) REFERENCES classes(id)
+);
+运行一下
+这个有点麻烦= =不想继续了
+ 总结:
+1.主表中没有的数据,在附表中,是不可以使用的.
+2.主表中记录的数据现在正在被附表所引用,那么主表中正在被引用的数据不可以被删除
+3.若要想删除,先将附表中的数据删除在删除主表数据
+4.对于外键约束大家可以联想 省,市 来进行联想 (市必须要依赖于省,只要省还有一个市在引用,那么就不可以删除省,要不然市就没有省了. 那么我们想删除省,必须要将该省下所有的市全部删除之后,才可以删除这个省)
+8.如何建表之后添加主键约束
+ 加入主键约束:
+ALTER TABLE user4 add PRIMARY KEY(id);
+ 删除主键约束:
+ALERT TABLE user4 DROP PRIMARY KEY;
+使用modify 修改字段.添加约束:
+ALTER TABLE user4 MODIFY id INT PRIMARY key;
+给主键设置自增长:
+ALTER TABLE user4 MODIFY id INT AUTO_INCREMENT;
